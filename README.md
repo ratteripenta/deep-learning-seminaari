@@ -9,3 +9,5 @@ The notebooks are slided. This means that they are presentable in the browser as
     jupyter nbconvert *.ipynb --to slides --post serve
 
 Remember to replace the asterisk with the proper filename.
+
+All diagrams have been mage with [draw.io](https://www.draw.io/).

@@ -6,6 +6,8 @@
 
 These are the lecture notes in Finnish for the TUT PLA-79100 course. In the course we went through the book Deep Learning (2016) by Goodfellow et al. and these are the presentable notes created. Initially they were ment for personal use only, so any enhancement proposals are welcome through pull requests.
 
+*Note: The notes are viewable only in a desktop browser due to Github's Jupyter Notebook rendering settings.*
+
 ## Why in Finnish and not in English?
 
 The simple answer: To help native Finnish speakers grasp the contents better. There's a plethora of books and online courses already about the subjects. What is missing however is an all-around repository of machine learning talk in Finnish. And its a shame, as native Finns regularly resort to speaking fluent Finglish when discussing the topics of machine learning. This is why. 

@@ -1,0 +1,167 @@
+
+*Created by Petteri Nevavuori.*
+
+---
+
+# Deep Learning seminaari
+
+Kirjana Goodfellow et al.: Deep Learning (2016)
+
+Otsikot seuraavat pääotsikoiden tasolla kirjaa, mutta alaotsikot eivät aina.
+
+<h1>Table of Contents<span class="tocSkip"></span></h1>
+<div class="toc"><ul class="toc-item"><li><span><a href="#15.-Representation-Learning" data-toc-modified-id="15.-Representation-Learning-1">15. Representation Learning</a></span><ul class="toc-item"><li><span><a href="#15.1-Greedy-Layer-Wise-Unsupervised-Pretraining" data-toc-modified-id="15.1-Greedy-Layer-Wise-Unsupervised-Pretraining-1.1">15.1 Greedy Layer-Wise Unsupervised Pretraining</a></span><ul class="toc-item"><li><span><a href="#When-and-Why-Does-Unsupervised-Pretraining-Work?" data-toc-modified-id="When-and-Why-Does-Unsupervised-Pretraining-Work?-1.1.1">When and Why Does Unsupervised Pretraining Work?</a></span></li></ul></li><li><span><a href="#15.2-Transfer-Learning-and-Domain-Adaptation" data-toc-modified-id="15.2-Transfer-Learning-and-Domain-Adaptation-1.2">15.2 Transfer Learning and Domain Adaptation</a></span></li><li><span><a href="#15.3-Semi-Supervised-Disentangling-of-Causal-Factors" data-toc-modified-id="15.3-Semi-Supervised-Disentangling-of-Causal-Factors-1.3">15.3 Semi-Supervised Disentangling of Causal Factors</a></span></li><li><span><a href="#15.4-Distributed-Representation" data-toc-modified-id="15.4-Distributed-Representation-1.4">15.4 Distributed Representation</a></span></li><li><span><a href="#15.5-Exponential-Gains-from-Depth" data-toc-modified-id="15.5-Exponential-Gains-from-Depth-1.5">15.5 Exponential Gains from Depth</a></span></li><li><span><a href="#15.6-Providing-Clues-to-Discover-Underlying-Causes" data-toc-modified-id="15.6-Providing-Clues-to-Discover-Underlying-Causes-1.6">15.6 Providing Clues to Discover Underlying Causes</a></span></li></ul></li></ul></div>
+
+## 15. Representation Learning
+
+Tässä luvussa keskitytään kuvausten (*representation*) oppimisen merkityksellisyyteen ja käyttökelpoisuuteen syvien menetelmien kanssa. Luvussa käydään läpi jaettuja kuvauksia, kuten ohjaamattomien menetelmien hyödyntämistä ohjatussa oppimisessa. Jaettuja kuvauksia käsitellään laajemminkin, minkä jälkeen lopussa käydään läpi kuvauksiin eli piirteiden selvittämiseen pohjaavien mallien menestyksen syitä.
+
+Informaation prosessointitehtävien haasteellisuus rippuu datan käsittely- ja esitystavasta. Tämä päätee elämässä laajemminkin. Laskutoimitukset hankaloituvat, mikäli pakotetaan roomalaisten numeroiden käyttö ja lukujen listaan lisäämisen tehokkuus vaihtelee listan esitystavan mukaan. Koneoppimisessa datan esitystapa on hyvä, kun se tekee käsiteltävän haasteen oppimisesta helpompaa.
+
+Perinteisissä myötäkytketyissä verkoissa piilokerrosten tehtävänä on tarjota viimeiselle eli ulostulokerrokselle helposti käytettävä esitys eli kuvaus syötteestä. Ohjatun oppimisen tapauksessa mallin oppimille piilokuvauksille ei ole rajoitteita. On kuitenkin myös algoritmeja, jotka pyrkivät muokkamaan dataa tiettyihin esitysmuotoihin. Jotkut mallit, kuten ohjaamattomat, oppivat datan kuvauksia koulutuksen sivutuotteena. Joka tapauksessa opittu kuvaus on lähes aina uudelleenkäytettävissä jossain toisessa oppimistehtävässä.
+
+Kuvausten oppiminen tarjoaa keinoja sekä ohjaamattoman että semi-ohjatun oppimisen tekemiseen, sillä oikein merkittyä dataa ei aina ole riittävästi koko datamassaan nähden yleistyvän ohjatun oppimisen suorittamiseksi. Ihmisten ja eläinten hyvin tehokkaaseen oppimiskykyyn nojaten on yhtenä yleisenä hypoteesinä, että aivoissakin toimisi jossain määrin ohjaamattoman ja semi-ohjatun oppimisen prosesseja.
+
+### 15.1 Greedy Layer-Wise Unsupervised Pretraining
+
+Ohjaamaton oppiminen oli merkittävin syväoppimisen tutkimuksen henkiinherättäjä etenkin ahneen kerroskohtaisen ohjaamattoman esikoulutuksen (*greedy layer-wise unsupervised pretraining*) vuoksi. Se on ennenkaikkea ohjaamattoman oppimisen käyttöä hyödyllisten kuvausten löytämiseksi, joiden avulla syvempien ohjatusti oppivien verkkojen koulutus on sitten tehokkaampaa ja ylipäätään mahdollista.
+
+Ohjaamaton esikoulutus tehdään kuvauksia tehokkaasti oppivilla matalilla menetelmillä, kuten rajoitetuilla Boltzmannin koneilla, autoenkoodereilla tai jollakin harvan koodauksen menetelmällä. Näillä menetelmillä esikoulutetaan syvän tavoiteverkon jokainen kerros yksitellen. Näin voidaan välttää resurssien osalta paljon intensiivisempää koko verkon kerralla koulutusta. 
+
+Vasta 2000-luvun puolivälin jälkeen huomattiin, että näin voidaan toimia ja toimittaessa saadaan hyvin alustettuja ja täten tehokkaasti kouluttuvia verkkoja, joskin tämä ei ole enää lähtökohtainen vaatimus syvien verkkojen koulutukseen.
+
+Menetelmää kutsutaan kerroskohtaisesti ahneeksi, koska se kouluttaa jokaisen kerroksen itsenäisesti huomioimatta muita kerroksia. Koulutus eteneekin siten, että koulutuksen aikana kaikki muut paitsi koulutettava kerros on jäädytetty eli pysyy muuttumattomana. Ohjaamattomaksi esikoulutusmenetelmäksi sitä kutsutaan siksi, että kukin kerros vain esikoulututeaan koulutettavaksi osaksi suurempaa verkkoa käyttäen ohjaamattoman oppimisen menetelmiä.
+
+Riippumatta valitusta esikoulutusalgoritmista itse esikoulutusprosessi on aina samankaltainen. Tämä on seurausta etenkin ohjaamattomien menetelmien samankaltaisuuksista. Ohjattujen menetelmien alustuksen lisäksi ohjaamatonta esikoulutusta voidaan käyttää myös ohjaamattomien verkkojen alustukseen.
+
+#### When and Why Does Unsupervised Pretraining Work?
+
+Ohjaamattoman esikoulutuksen on huomattu parantavan testivirhettä etenkin luokittelutehtävissä. Muissa koneoppimistehtävissä hyöty voi kuitenkin jäädä olemattomaksi tai jopa siirtyä haitan puolelle. Regressiotehtävissä sen on huomattu olevan esimerkiksi ennemmin haitallista. Siksi sen, eli siis ohjaamattoman kerroskohtaisen ahneen esikoulutuksen, käyttö edellyttää menetelmän ymmärrystä ja harkintaa.
+
+Ohjaamaton esikoulutus yhdistää kaksi erillistä ajatusta. Ensimmäinen niistä on, että syvän mallin parametrien alustuksella on merkitystä mallin koulutuksen ja lopullisen suorituskyvyn kannalta regularisoivuuden kautta. Toinen on, että syötedatan jakaumasta oppimalla voidaan edesauttaa mallin syötteistä tuotteisiin tapahtuvaa kuvauksen tarkentumista. Molemmat näistä omaavat koneoppimisen alueella riippuvuuksia, joita ei täysin ymmärretä.
+
+Parametrien alustuksen regularisaatiovaikutus on näistä kahdesta huonommin ymmärretty. Esikoulutuksen alkuvaiheessa tavoite oli mallin alustaminen lähelle globaalisti kohdefunktion arvon minimoivaa parametriavaruuden kohtaa. Nykyään lokaalit minimit eivät kuitenkaan ole enää merkittäviä esteitä, sillä koulutus ei saavuta lähes koskaan mitään kriittistä pistettä, vaan vain lähestyy sitä.
+
+Koska alustuksen vaikutusta koulutukseen ei osata riittävän tarkasti rajata, ei alustuksella välttämättä saavuteta muuta kuin mahdollisesti muutoin saavuttamattomia alueita. Esimerkiksi tietoa siitä, mitkä alustetut piirteet säilyvät ja mitkä eivät, ei voida saavuttaa. Siksi onkin tyypillistä, että esikoulutuksen sijasta ohjaamattomia ja ohjattuja menetelmiä käytetään koulutuksessa rinnan tai jopa siten, että menetelmät erotetaan mallin omiksi osikseen.
+
+Jälkimmäinen ajatuksista, ohjaamattomasti opittujen datan piirteiden myöhempi hyödynnettävyys, on paremmin ymmärretty. Perusajatuksena on, että ohjaamattomalle menetelmälle hyödylliset piirteet voivat olla hyödyllisiä myös ohjatulle menetelmälle. Esimerkiksi hahmontunnistuksessa tästä voi olla hyötyä, kun ensin ollaan opittu olennaisesti toisistaan eroavia piirteitä ohjaamattomasti ja tämän jälkeen näitä käytetään vaikkapa luokitteluun.
+
+Teoreettisella tasolla tätä ei kuitenkaan vielä ymmärretä, vaan vain empiirisellä ja intuitiivisella. Ajatuksen hyödynnettävyys riippuu myös jonkin verran käytetyistä malleista - esimerkiksi lineaariluokitin tarvitsee lineaarisesti erottuvia piirteitä.
+
+Ohjaamaton esikoulutus on parhaimmillaan silloin, kun datan lähtökohtainen kuvauksellisuus on heikkoa. Esimerkiksi sanojen olemassaolon binäärimäinen ilmaisu (*one-hot encoding*) ei auta juurikaan niiden luokittelussa. Tällöin ohjaamattomasti opitut sanaupotteet (*word embeddings*) ovat paljon parempi ja informaatiota tehokkaammin välittävä vaihtoehto. Ylipäätään kielen ja sanojen kanssa esikoulutus on hyödyllistä. Kuvien kanssa hyöty ei ole niin suurta kuvauksiltaan lähtökohtaisesti paljon rikkaammaan datan vuoksi.
+
+Kun datassa on vain vähän oikein merkittyjä (*labeled*) näytteitä suhteessa merkitsemättömiin näytteisiin, auttaa ohjaamaton esikoulutus regularisoimaan koulutusta. Tällöin merkitsemättömät näytteet saadaan ryhmiteltyä, jolloin saavutetaan semi-ohjattu koulutustilanne. Tämä toimintatapa sai suurimman vahvistuksen vuonna 2011, kun sitä käyttämällä voitettiin kansainvälisiä siirtokoulutukseen (*transfer learning*) liittyviä kilpaluja.
+
+Mikäli opittava ongelma eli funktio kovin monimutkainen, on ohjaamaton esikoulutus vaikkapa painojen heikentämistä parempi regularisointimenetelmä. Vääristymän sijasta esikoulutus auttaa mallia suuntaan, jossa monimutkaiselle funktiolle voidaan löytää merkittäviä piirre- eli osafunktioita. 
+
+Ohjaamatonta esikoulutusta on käytetty menestyksekkäimmin luokittelussa ja regularisoijana, eli testivirheen laskijana. Pelkän regularisoinnin lisäksi menetelmä auttaa myös optimoinnissa, jolloin koulutus on tehokkaampaa. Näin on havaittu vaikkapa syvien autoenkooderien kanssa. Tällöin sekä koulutus- että testivirheet saadaan tuotua matalammalle tasolle, jolloin verkon kapasiteettia hyödynnetään paremmin. 
+
+Syyksi tälle on esitetty, että esikoulutus vie mallin parametrit muutoin koulutuksen ulottumattomissa olevalle alueelle. Esikoulutetut neuroverkot näyttävät käyttäytyvän samaan tapaan monista muuttuvista tekijöistä huolimatta - ne tuottavat samankaltaisia tuloksia. Näyttää siltä, että esikoulutus pienentää verkkojen varianssia. Tämän voidaan tulkita tarkoittavan sitä, että ohjaamaton esikoulutus alustaa mallin parametrit alueelle, jossa ne pysyvät vahvemmin.
+
+Hyödyllisimmillään ohjaamaton esikoulutus on syvien arkkitehtuurien kanssa, sillä niiden kanssa on havaittu suurimmat koulutus- ja testivirheiden parannukset. Nämä tulokset ovat kuitenkin saatu ennen nykyisiä syvien verkkojen koulutuksen standardimenetelmiä (*ReLU, dropout, batch normalization*).
+
+Muihin regularisointimenetelmiin verrattuna ohjaamattomalta esikoulutukselta puuttuu koulutuksen aikaisen vahvuuden säätöominaisuus hyperparametrein. Sen sijaan itse esikoulutusmenetelmillä on useita omia hyperparametrejaan, joita on hankala virittää etukäteen. Koko mallin koulutus on myös kaksivaiheinen. Mikäli ohjattua ja ohjaamatonta koulutusta käytetään rinnan, voidaan ohjaamattoman koulutuksen vahvuutta säätää. Tällöin regularisoinnin määrä on ennustettavissa ja malli koulutettavissa kerralla. Näin ei siis kuitenkaan ole ohjaamattoman esikoulutuksen kanssa.
+
+Kaksivaiheinen koulutus nostaa myös lisäongelmia hyperparametrien osalta. Koska varsinainen koulutus seuraa esikoulutusta ja riippuu myös siitä, on varsinaisen koulutuksen hyperparametrien säätäminen tehtävä aina suhteessa esikoulutukseen. Viritys on tällöin raskasta ja hidasta.
+
+Ohjaamaton esikoulutus on kuitenkin pääsääntöisesti nykyaikaina jäänyt unholaan, poislukien luonnollisen kielen koneoppimistehtävät. Ohjattuun oppimiseen perustuvat ja joko poispudotuksella tai osajoukkojen normalisoinnilla regularisoidut syväoppivat menetelmät pärjäävät ohjaamattomia esikoulutusmenetelmiä paremmin vielä muutaman tuhannen oikein merkityn näytteen luokittelutehtävissä. Pienemmillä dataseteillä Bayesilaiset menetelmät toimivat vuorostaan paremmin.
+
+Menetelmän merkityksellisyys onkin historiallinen, ja jo luvussa 8 esitetty ohjattu esikoulutus onkin nykyisinkin käytetty esikoulutusmenetelmä siirto-oppimiseen.
+
+### 15.2 Transfer Learning and Domain Adaptation
+
+Siirto-oppiminen (*tranfer learning*) ja tietoalueeseen sopeutuminen (*domain adaptation*) viittaavat toisaalla opitun hyödyntämiseen muussa yhteydessä. Aihe liittyy läheisesti kuvausten jakamiseen mallien välillä. Käyttötarkoituksesta riippuen aihetta sivuavia ongelman nimityksiä on useita. Tavoitteena joka tapauksessa on, että aiemmasta kontekstista opitut kuvaukset ovat käytettävissä joko sellaisinaan tai täydennettyinä jossain toisessa riittävän samankaltaisessa kontekstissa.
+
+Siirto-oppimisessa lähtökohtana, että opitut piirteet ja datan varianssia selittävät tekijät ovat hyödyllisiä myös toisessa ajatellussa kontekstissa. Tällöin vaikkapa syötteet pysyvät samoina, mutta ennustettavat kohteet eivät. Hahmontunnistuksessa tietyt reunat, valoisuuden vaihtelut ja geometriat ovat pääpiirteisesti samoja, vaikka yksityiskohdat olisivatkin eriäviä. Näin tarkaksi koulutettu koiria tunnistava malli voi toimia hyvänä lähtökohtana vaikkapa kissoja tunnistavalle mallille. Tällöin mallista on hyödyllistä käyttää syöte- ja piilokerroksia uudelleen.
+
+Toisaalta ennustettavat kohteet voivat myös pysyä samoina syötteiden vaihtuessa, joko piilo- tai ulostulokerroksissa. Tällöin uudelleenkäytön kohteita ovat piilo- ja ulostulokerrokset.
+
+Tietoalueeseen sopeutuminen on sukua siirto-oppimiselle. Siinä tosin malli pysyy samana, mutta syötteissä on eroa. Tällöin käyttökohteena voi olla vaikkapa tunneanalyysi tuotearvosteluissa, jossa samaa asiaa tahdotaan tunnistaa eri konteksteissa. Tunnistunmisen kohde ei siis muutu, ja oletuksena myös on, että kontekstin vaihtuessa tietyt tunnetiloja ilmaisevat merkitsevät piirteet pysyvät samoina.
+
+Edelleen saman alueen ongelma on konseptin liukuma (*concept drift*), joka on pohjimmiltaan tietoalueeseen sopeutumista mutta asteittaisin datan jakauman muutoksin. 
+
+Siirto-oppimisen alueen koneoppimiskilpailuissa on havaittu, että mitä syvemmillä verkoilla eli syvempiä piirteitä ensimmäisestä kontekstista optiaan, sitä paremmin ja nopeammin malli kykenee oppimaan toisessa kontekstissa. Selityksenä voi olla, että tällöin pienempi määrä näytteitä riittää lähes asymptoottisen yleistymisen oppimiseen.
+
+Äärimmäisiä siirto-oppimisen erikoistapauksia ovat kerrasta (*one-shot*) ja näkemättä (*zero-shot, zero-data*) oppiminen. Näille annetaan nimensä mukaisesti joko yksi tai ei yhtään merkittyä näytettä, josta oppiminen tapahtuu. Kerrasta näkeminen nojaa ensimmäisestä kontekstista opittuihin, jonka avulla uuden kontekstin näytteet voidaan kerralla sijoittaa ja ryhmitellä. Tällöin tärkeintä on selkeästi erottuvat ja merkitykselliset opitut piirteet.
+
+Näkemättä oppiminen vaatii datasetin lisäksi aina jotain lisätietoa. Malli voi esimerkiksi oppia tunnistamaan kissan kuvasta, jos se saa tekstistä tietoa kissan jaloista, kasvoista ja vaikkapa hännästä. Tällöin mallin on kyettävä kuitenkin yhdistämään nämä yksittäiset piirteet kuvista havaittaviin hahmon osiin todetakseen kokonaisuuden olevan melko varmasti kissa. 
+
+Mikäli kyseessä olisi lauseiden tunnistus näkemättä, olisi mallilla oltava käytössään riittävästi sanojen ja lauseiden merkityksiä määrittäviä sanaupotteita. Konekäännöksessä tämä tarkoittaisi lähde- ja kohdekielten sanojen kielten sisäisten ja välisten yhteyksien oppimista yhdessä joidenkin samaa tarkoittavien lauseiden kanssa. Tällöin ennalta tuntemattoman lauseen kääntäminen opettamatta voi olla mahdollista.
+
+Näkemättä oppiminen toimii samalla periaatteella, kuin monimerkityksellisyyksien oppiminen (*multimodal learning*). Siinä pyritään tavoittamaan kahden eri merkityksen kuvauksen välinen suhde. Kun tämä suhde on opittu, ovat kuvaukset ankkuroitu toisiinsa ja niitä voidaan käyttää kiintopisteinä uusien jompaan kumpaan liittyvän merkityksen kuvauksen oppimisessa.
+
+### 15.3 Semi-Supervised Disentangling of Causal Factors
+
+Tärkeä kuvausten oppimiseen liittyvä kysymys liittyy kuvausten paremmuuden mittariin. Eräs ajatuksista on, että hyvät kuvaukset kykenevät erottelemaan itsenäisiä kausaalisuuksia eli datantuottoprosessissa perustavasti vaikuttavia syitä. Itsenäisyydellä tarkoitetaan, että kausaalisuudet ovat toisistaan erillisiä. Vaikka tästä ei suoraan sitä seuraakkaan, niin hyvä kuvaus voi myös helpottaa syötteen laskentaa tuotteeksi.
+
+Kuvausten oppimisen tavoitteena on usein ollut helposti mallinnettavien eli harvojen ja riippumattomien piirteiden löytäminen, sillä täysin kausaalisuudet erottavan mallin tuottaminen ei ole helppoa. Osittain eli semi-ohjattu oppiminen ohjaamattomien kuvausten oppimisen kautta tarjoaa kuitenkin välineitä erotella kausaalisuudet toisistaan, kunhan vain ensin datantuottoprosessin merkittävät piirteet on opittu.
+
+Toisin sanoen, mikäli datasta $x$ opitaan piirteet $h$, voidaan piirteillä $h$ ennustaa merkityksellisimmät piirteet kohteista $y$.
+
+Osittain ohjattu oppiminen voi silti epäonnistua, mikäli datasta ei voida löytää mitään merkityksellistä vaikkapa datan tasaisen jakautuneisuuden vuoksi. Mikäli datantuottoprosessi on kuitenkin useamman jakauman yhdistelmä siten, että kohdearvot ovat näiden yhdistelmäjakaumien tuotoksia, voidaan datantuottoprosessia mallintamalla erottaa lopullisen jakauman komponentit selkeästi toisistaan. Tällöin myös yksi merkitty näyte riittää kunkin osa-jakauman mallintamiseen.
+
+Mikäli kohdearvot ovat vielä yhteydessä datantuottoprosessin kausaalisiin tekijöihin, on datantuottoprosessin ja syötteiden kohteiksi mallintamisen välillä vahva sidos. Tällöin datantuottoprosessin variaatioita eniten selittävät tekijät on löydettävissä sekä ohjaamattomilla että osittain ohjatuilla menetelmillä.
+
+Ideaalitilanteessa kuvauksia oppivat algoritmit kykenevät oppimaan eniten datantuottoprosessin variaatioita selittävät piilomuuttujat $h$. Mikäli ennustettava kohdearvo $y$ on läheisesti yhteydessä näihin piilomuttujiin, on se helposti ennustettavissa. Samoin syötteiden $x$ jakauma on kiinteästi yhteydessä kohdearvoihin $y$ ehdollisen todennäköisyyden 
+
+$$ p(y \mid x) = \frac{p(x \mid y)p(y)}{p(x)} $$
+
+kautta. Niissä mallinnustilanteissa, joissa nämä oletukset voidaan todeta, kyetään osittain ohjatulla oppimisella parantamaan mallin suorituskykyä.
+
+Tärkeä tutkimusongelma on oikeiden kohdearvoja selittävien piilomuuttujien erottelu ja löytäminen laajasta joukosta mahdollisia selittäviä tekijöitä. Käyttämällä vain ohjaamatonta oppimista näihin selittäviin tekijöihin päästään käsiksi raa'an iteratiivisella kaikkien mahdollisten selittävien tekijöiden erottelulla. Tällöin merkittävimpien tekijöiden erottelu on vaikeaa. 
+
+Käytännössä tämä ei ole suotuisa toimintatapa, sillä kaikkia variaatiota selittäviä tekijöitä ei vain kyetä erottelemaan. Osittain ohjatussa oppimisessa ajankohtainen tutkimuksen kohde on oppimisen arvoisten asioiden määrittely. Yksi koulutusstrategia tähän on käyttää ohjaamatonta ja ohjattua oppimista yhdessä. Toinen on oppia ohjaamattomasti selkeästi laajempia kuvauksia.
+
+Ohjaamattomassa oppimisessa merkityksellisten piilopiirteiden oppimista säädellään virhefunktiolla. Esimerkiksi kuvantunnistuksessa keskineliövirhe painottaa eniten pikseleitä muuttavia piirteitä. Tällöin havaintoalueella esiintyvät pienemmät kohteet voivat jäädä koulutuksen kannalta merkityksettömiksi. Tästä syystä lisääntyvää huomiota saava strategia on vaihdella piirteiden oppimisen tapaa.
+
+Eräs viimeaikainen vaihtoehtoinen piirteiden oppimistapa on vastaesimerkein koulutettavan tuottavan mallin (*generative adversarial network, GAN*) koulutus. Kyseessä on kahden verkon yhdistelmä, jossa toinen on kuvia tuottava ja toinen niitä arvioiva. Tavoitteena verkolla on, että löydetään tasapaino, jossa tunnistava verkko ei enää osaa erottaa tuotettuja kuvia todellisista vastinkappaleistaan. 
+
+Tällöin verkot oppivat yhdessä tehokkaasti merkittävimpiä piirteitä. Keskivirheellä koulutut ihmispäitä tuottavat verkot jättävät usein esim. korvat tuottamatta, kun taas GANilla koulutettu malli osaa tuottaa korvien lisäksi myös muita yksityiskohtaisempia piirteitä.
+
+Mikäli siis datantuottoprosessissa syötearvot $x$ ovat selitettävissä kohdearvoilla $y$, on ehdollinen todennäköisyys $p(x \mid y)$ robusti $p(y)$ muutoksille. Hyvin useasti kausaaliset syyt eniten selittävät tekijät pysyvät datantuottoprosessissa samoina, vaikka näytteissä olisikin esim. ajallista tai mallinnustehtävään liittyvää vaihtelua. Paras robustisuus saavutetaan mallintamalla ehdollinen todennäköisyys $p( \mid h)$.
+
+### 15.4 Distributed Representation
+
+Elementteihinsä eroteltavat eli hajautettavat kuvaukset (*distributed representations*) ovat tärkein osa kuvausten oppimista. Hajautetut kuvaukset voivat käyttää $n$ piirrettä $k$ arvon kanssa esittääkseen $k^n$ eri kuvausta tai konseptia. Syväoppivat menetelmät hyödyntävät tätä.
+
+Hajautettujen kuvausten vastakohtana ovat hajauttamattomat kuvaukset, joista karikatyyrisin esimerkki on syötteen mallintaminen joksikin yhdeksi luokaksi. Tällaisen mallin mahdollisten kuvausten määrä rajoittuu kohdeluokkien määrään. Hajauttamattoman kuvauksen menetelmiä ovat klusterointimenetelmät, puumallit, yhdistelmäjakaumamallit, Gaussin kernelin omaavat kernelkoneet ja $n$-grammimallit. Tällaisia malleja kutsutaan symobolisesti kuvaaviksi (*symbolically representative*).
+
+Hajautetut mallit eroavat symbolisista siinä, että niiden yleistyminen tapahtuu kuvausten välisten ominaisuuksien jakamisella (*shared attributes*). Esimerkki tästä on symbolien `kissa` ja `koira` kuvaaminen yleisempien ominaisuuksien, kuten `on_turkki`, `on_häntä`, `on_neljä_jalkaa`, kautta. Näin toisistaan kaukana olevat yksittäiset symbolit saadaankin tuotua ominaisuuksiensa kautta lähemmäs toisiaan kuvaten symbolien samankaltaisuutta rikkaasti. Tästä syystä hajautettuihin kuvauksiin pohjaavat neuraaliset kielimallit yleistyvät tehokkaasti.
+
+Hajautettujen kuvausten käyttö on hyödyllistä, kun näennäisesti monimutkainen data voidaan esittää vain muutamilla merkitsevillä parametreilla. Mikäli data on moniulotteista, ei symbolisten menetelmien käyttö ole suotavaa ulottuvuuksien kirouksen vuoksi. Samoin ne kärsivät kyvystä yleistyä ennalta tuntemattomiin esimerkkeihin kelvollisesti, sillä ne pyrkivät ennen kaikkea oppimaan kuvaamaan vain koulutusdatan perusteella - uusi alue vaatii aina uuden koulutusnäytteen.
+
+Vaikka hajautetut kuvaukset kykenevätkin kuvantamaan syöteavaruutta hyvin laajasti ($k^n$ piirreavaruuden aluetta $k$ arvolla ja $n$ piirteellä), ne eivät silti ylisovitu mallien rajoitetun kapasiteetin vuoksi. Siksi koko mahdollisesta hajautetun kuvausten avaruudesta pyritään löytämään kaikkein merkityksellisimmät kuvaukset tai niiden alueet. Esimerkiksi lineaariluokittimen käyttö yhdessä hajautettujen jakaumien kanssa asettaa luokittelulle ehdon, että erilaiset luokat ovat lineaarisesti erotettavissa toisistaan.
+
+Melko viimeaikaisissa tutkimuksissa on huomattu, että syvien konvoluutioverkkojen piiloyksiköt oppivat usein ihmisen tulkittavissa olevia piirteitä. Näille piirteille on yhteistä, että niistä piirteistä on mahdollista oppia lisää eristeisesti, toisia piirteitä näkemättä. Tämä tarkoittaa sitä, että hajautettua kuvausta hyödyntävien mallien oppimia piirteitä voidaan käsitellä erillisinä. 
+
+Käytännön esimerkkinä on kasvoja tunnistamaan koulutettu malli, jonka kanssa voidaan suorittaa aritmeettisia laskutoimituksia siten, että
+
+$$ \text{Silmälasipäinen mies} - \text{Mies} + \text{Nainen} = \text{Silmälasipäinen nainen.} $$
+
+Nämä piirteet, joiden avulla tämänkaltaiset toiminnot ovat mahdollisia, ovat mallin itse oppimia eikä ennalta asetettuja. Kyse on ennenkaikkea tilastollisesta piirteiden erottuvuudesta, joka on hyvin viimeaikainen löytö generatiivisten mallien alueella.
+
+### 15.5 Exponential Gains from Depth
+
+Syvien menetelmien etuna on, että ne voivat oppia tehokkaammin funktioita, jotka matalammilla malleilla tarvitsevat suuremman määrän parametreja. Näin saavutetaan myös tilastollista vakautta. Tämä pätee edelleen yleisestikin syvissä malleissa. Edellisen aliluvun kasvoja tunnistava malli oli syvä, ja merkityksellisten jaettavien piirteiden oppiminen edellyttääkin syvää epälineaarista mallia. Epälineaarisuuksien ja piirteiden uudellenkäytön on osoitettu parantavan mallin tilastollista tehokkuutta yhdessä jaettujen kuvausten kanssa. 
+
+Muutoin aliluku vain jatkaa jo luvussa 6 aloitettu syvyyden etujen keskustelua.
+
+### 15.6 Providing Clues to Discover Underlying Causes
+
+Hyvän kuvauksen ominaisuudeksi on tähän mennessä esitetty, että se kykenee erittelemään datan piilevät kohdetarkoitukseen parhaiten sopivat variaation lähteet toisistaan. Näiden oppimiseen käytetään usein vihjeitä. Ohjattu oppiminen tarjoaa vihjeistä parhaimman, mutta jo oikein regularisoimalla voidaan koulutuksella saavuttaa hyviä kuvauksia (lähes) ohjaamattomastikin. 
+
+Yleisellä tasolla piilevien syiden mallintamiseen sopivia regularisoinnilla tavoiteltavia mallin ominaisuuksia ovat kirjan mukaan seuraavat:
+
+ - *Sulavuus*: Koulutetun mallin tulisi mallintaa läheisesti samankaltaisia näytteitä samalle aluelle.
+ - *Lineaarisuus*: Usein näytteiden arvojen tai niistä muodostettujen piirteiden välillä on lineaarisia yhteyksiä, joita hyödyntämällä malli voi ennustaa myös ikäänkuin interpoloimalla.
+ - *Selittävien tekijöiden moninaisuus*: Lähtökohtainen ajatus on useissa koneoppimistehtävissä, että datantuottoprosessi on useamman komponentin yhteisivakutuksella tuotettu kokonaisuus.
+ - *Kausaalitekijät*: Malli käsittelee opittuja piirteitä $h$ itse asiassa syötteet $x$ tuottavina syinä, jolloin opitut piilopiirteet pyrkivät nimenomaan mallintamaan dataa $x$ tuottanutta prosessia. Tätä pyrittiin selittämään aliluvussa 15.3.
+ - *Selittävien tekijöiden hierarkisuus*: Mallin sisäinen rakenne auttaa jatkuvasti kompleksimpien piirteiden oppimista, alkaen esimerkiksi reunoista ja edeten ihmiskasvojen merkittäviin eroaviin piirteisiin (silmät, suu, jne.).
+ - *Piirteiden jakaminen tehtävien kesken*: Samaa dataa hyödyntävät eri tehtävät voivat jakaa opittuja piirteitä keskenään.
+ - *Pinnat*: Koulutettu malli kykenee mukailemaan piirre- ja kohdefunktioavaruuden pintaa, joka itsessään on datantuottoprosessia vastaava.
+ - *Luonnollinen ryhmittely*: Samankaltaiset syötteet ryhmittyvät samalla tavalla (miten tämä eroaa jo mainitusta sulavuudesta?)
+ - *Johdonmukaisuus*: Merkittävimmät piirteet ovat aina johdonmukaisesti käyttäytyviä sekä ajallisesti ja tilallisesti.
+ - *Harvuus*: Useimmat opittavat piirteet eivät ole merkittäviä datantuottoprosessin merkittävimpien piirteiden rinnalla.
+ - *Yksinkertaiset riippuvuudet*: Mallin oppimat piirteet ovat selkeästi ja yksinkertaisesti riippuvaisia edellisistä piirteistä.
+
+Oma kommentti: Lukuna tämä oli vähän sellainen mish-mash-kokonaisuus, jossa toistettiin paljon jo esiteltyjä ajatuksia ja suoranaisesti jopa viitattiinkin niihin. Toisaalta asiat tuntuivat välillä turhan irrallisilta toisistaan.
